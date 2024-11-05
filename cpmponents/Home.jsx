@@ -42,7 +42,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.container(isDarkMode)}>
         {/* Header with greeting and notifications */}
         <View style={styles.header}>
-          <Text style={styles.greeting(isDarkMode)}>{greeting}, Lisa 👋</Text>
+          <Text style={styles.greeting(isDarkMode)}>{greeting} Aman 👋</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity style={styles.notificationIconContainer}>
               <Icon name="notifications-outline" style={styles.notificationIcon(isDarkMode)} />
