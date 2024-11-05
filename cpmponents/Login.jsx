@@ -1,24 +1,64 @@
-// components/LoginScreen.js
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigation = useNavigation();
+
+  // Function to handle login
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8080/login', { // Use 10.0.2.2 for Android emulator
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Login successful!');
+        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+      } else {
+        Alert.alert('Error', data.error || 'Invalid email or password');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred. Please try again later.');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back!</Text>
 
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#888" keyboardType="email-address" />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
       </View>
 
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#888" secureTextEntry />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
       </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Home' }] })}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
 

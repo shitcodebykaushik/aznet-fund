@@ -1,24 +1,64 @@
-// components/SignupScreen.js
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const SignupScreen = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigation = useNavigation();
+
+  // Function to handle signup
+  const handleSignup = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8080/signup', { // Use 10.0.2.2 for Android emulator
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Account created successfully!');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('Error', data.error || 'Error signing up');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'An error occurred. Please try again later.');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create an Account</Text>
       
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#888" keyboardType="email-address" />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
       </View>
       
       <View style={styles.inputContainer}>
-        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#888" secureTextEntry />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#888"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
       </View>
 
-      <TouchableOpacity style={styles.signupButton}>
+      <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
         <Text style={styles.signupButtonText}>Sign Up</Text>
       </TouchableOpacity>
 
