@@ -92,7 +92,7 @@ const HomeScreen = () => {
         {/* Categories Section */}
         <Text style={[styles.sectionTitle, isDarkMode ? styles.darkText : styles.lightText]}>Categories</Text>
         <View style={styles.categoryContainer}>
-          <CategoryIcon icon="apps-outline" label="All" onPress={() => {}} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="apps-outline" label="Review" onPress={() => {}} isDarkMode={isDarkMode} />
           <CategoryIcon
             icon="megaphone-outline"
             label="Campaign"
