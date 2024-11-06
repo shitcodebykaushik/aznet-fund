@@ -9,6 +9,8 @@ import LoginScreen from './cpmponents/Login';
 import HomeScreen from './cpmponents/Home';
 import CampaignPage from './cpmponents/campaign';
 import DonatePage from './cpmponents/donate';
+import EscrowPage from './cpmponents/escrow';
+import CharityPage from './cpmponents/charity';
 
 import Icon from 'react-native-vector-icons/Ionicons'; // For icons in the tab navigator
 
@@ -24,6 +26,8 @@ function StackNavigator() {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Campaign" component={CampaignPage} />
       <Stack.Screen name="Donate Goods" component={DonatePage} />
+      <Stack.Screen name="EscrowPage" component={EscrowPage} />
+      <Stack.Screen name="CharityPage" component={CharityPage} />
     </Stack.Navigator>
   );
 }

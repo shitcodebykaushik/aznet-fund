@@ -35,7 +35,13 @@ const SignupScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create an Account</Text>
-      
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          placeholderTextColor="#888"
+        />
+      </View>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -46,7 +52,6 @@ const SignupScreen = () => {
           onChangeText={setEmail}
         />
       </View>
-      
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}

@@ -92,7 +92,9 @@ const HomeScreen = () => {
         {/* Categories Section */}
         <Text style={[styles.sectionTitle, isDarkMode ? styles.darkText : styles.lightText]}>Categories</Text>
         <View style={styles.categoryContainer}>
-          <CategoryIcon icon="apps-outline" label="Review" onPress={() => {}} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="apps-outline" label="Escrow" onPress={() => navigation.navigate('EscrowPage')}  // Navigate to Escrow 
+           isDarkMode={isDarkMode} 
+           />
           <CategoryIcon
             icon="megaphone-outline"
             label="Campaign"
@@ -105,7 +107,8 @@ const HomeScreen = () => {
             onPress={() => navigation.navigate("Donate Goods")}
             isDarkMode={isDarkMode}
           />
-          <CategoryIcon icon="heart-outline" label="Charity" onPress={() => {}} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="heart-outline" label="Charity" onPress={() => navigation.navigate('CharityPage')}
+           isDarkMode={isDarkMode} />
         </View>
 
         {/* Past Donations Section */}
