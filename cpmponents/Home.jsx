@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Modal,
   useColorScheme,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -19,11 +20,16 @@ const HomeScreen = () => {
   const isDarkMode = colorScheme === 'dark';
   const navigation = useNavigation();
 
-  // State for greeting, campaigns, and modal visibility
+  // State for greeting, campaigns, modal visibility, and profile modal
   const [greeting, setGreeting] = useState('');
   const [campaigns, setCampaigns] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [newCampaign, setNewCampaign] = useState({ title: '', description: '', status: 'Approval is Pending' });
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
+  const [isChatbotModalVisible, setIsChatbotModalVisible] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState('');
+  const [conversationStage, setConversationStage] = useState(0);
 
   // Sample data for past donations
   const pastDonations = [
@@ -45,29 +51,61 @@ const HomeScreen = () => {
     setIsModalVisible(false);
   };
 
+  // Handle user input for chatbot
+  const handleChatSubmit = () => {
+    if (userInput.trim() === '') return;
+
+    // Add user message
+    const userMessage = { id: Date.now().toString(), text: userInput, isUser: true };
+    setChatMessages([...chatMessages, userMessage]);
+
+    // Determine chatbot response based on conversation stage
+    setTimeout(() => {
+      let botMessageText = '';
+      if (conversationStage === 0) {
+        botMessageText = "I'm here to help with any questions about donating or further issues.";
+        setConversationStage(1);
+      } else if (conversationStage === 1) {
+        botMessageText = "Here are some solutions: try logging in again, checking your internet connection, and ensuring your settings are configured properly.";
+        setConversationStage(2);
+      } else if (conversationStage === 2) {
+        botMessageText = "Are you satisfied with this solution? Please respond with 'Yes' or 'No'.";
+        setConversationStage(3);
+      } else if (conversationStage === 3 && userInput.toLowerCase() === 'no') {
+        botMessageText = "Your problem has been registered. Please contact us at 6239165083.";
+        setConversationStage(0); // Reset the conversation
+      } else {
+        botMessageText = "Thank you for reaching out. Have a great day!";
+        setConversationStage(0); // Reset the conversation
+      }
+
+      const botMessage = { id: (Date.now() + 1).toString(), text: botMessageText, isUser: false };
+      setChatMessages((prevMessages) => [...prevMessages, botMessage]);
+    }, 1000);
+
+    setUserInput('');
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode ? styles.darkMode : styles.lightMode]}>
       <ScrollView style={[styles.container, isDarkMode ? styles.darkMode : styles.lightMode]}>
-        {/* Header with greeting and user management */}
+        {/* Existing Content */}
         <View style={styles.header}>
           <Text style={[styles.greeting, isDarkMode ? styles.darkText : styles.lightText]}>{greeting} Aman 👋</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* User Management Icon */}
-            <TouchableOpacity onPress={() => navigation.navigate('UserManagement')} style={styles.iconContainer}>
+            <TouchableOpacity onPress={() => setIsProfileModalVisible(true)} style={styles.iconContainer}>
               <Icon name="person-outline" size={24} color={isDarkMode ? '#fff' : '#333'} />
             </TouchableOpacity>
             <TouchableOpacity>
-              <Image
-                source={{ uri: 'https://example.com/profile-pic.png' }}
-                style={styles.profileImage}
-              />
+              <Image source={{ uri: 'https://example.com/profile-pic.png' }} style={styles.profileImage} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <Text style={[styles.subheading, isDarkMode ? styles.darkText : styles.lightText]}>What do you wanna donate today?</Text>
+        <Text style={[styles.subheading, isDarkMode ? styles.darkText : styles.lightText]}>
+          What do you wanna donate today?
+        </Text>
 
-        {/* Search bar */}
         <View style={[styles.searchContainer, isDarkMode ? styles.darkSearch : styles.lightSearch]}>
           <Icon name="search-outline" size={20} color={isDarkMode ? '#ccc' : '#888'} />
           <TextInput
@@ -77,10 +115,10 @@ const HomeScreen = () => {
           />
           <Icon name="options-outline" size={20} color={isDarkMode ? '#ccc' : '#888'} />
         </View>
-
-        {/* Campaign Banner */}
         <View style={[styles.campaignBanner, isDarkMode ? styles.darkBanner : styles.lightBanner]}>
-          <Text style={[styles.bannerText, isDarkMode ? styles.darkText : styles.lightText]}>Do you really have a creative idea?</Text>
+          <Text style={[styles.bannerText, isDarkMode ? styles.darkText : styles.lightText]}>
+            Do you really have a creative idea?
+          </Text>
           <TouchableOpacity
             style={[styles.startCampaignButton, isDarkMode ? styles.darkButton : styles.lightButton]}
             onPress={() => setIsModalVisible(true)}
@@ -89,29 +127,14 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Categories Section */}
         <Text style={[styles.sectionTitle, isDarkMode ? styles.darkText : styles.lightText]}>Categories</Text>
         <View style={styles.categoryContainer}>
-          <CategoryIcon icon="apps-outline" label="Escrow" onPress={() => navigation.navigate('EscrowPage')}  // Navigate to Escrow 
-           isDarkMode={isDarkMode} 
-           />
-          <CategoryIcon
-            icon="megaphone-outline"
-            label="Campaign"
-            onPress={() => navigation.navigate('Campaign')}
-            isDarkMode={isDarkMode}
-          />
-          <CategoryIcon
-            icon="gift-outline"
-            label="Donate Goods"
-            onPress={() => navigation.navigate("Donate Goods")}
-            isDarkMode={isDarkMode}
-          />
-          <CategoryIcon icon="heart-outline" label="Charity" onPress={() => navigation.navigate('CharityPage')}
-           isDarkMode={isDarkMode} />
+          <CategoryIcon icon="apps-outline" label="Escrow" onPress={() => navigation.navigate('EscrowPage')} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="megaphone-outline" label="Campaign" onPress={() => navigation.navigate('Campaign')} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="gift-outline" label="Donate Goods" onPress={() => navigation.navigate('Donate Goods')} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="heart-outline" label="Charity" onPress={() => navigation.navigate('CharityPage')} isDarkMode={isDarkMode} />
         </View>
 
-        {/* Past Donations Section */}
         <Text style={[styles.sectionTitle, isDarkMode ? styles.darkText : styles.lightText]}>Past Donations</Text>
         {pastDonations.map((donation) => (
           <View key={donation.id} style={[styles.donationCard, isDarkMode ? styles.darkCard : styles.lightCard]}>
@@ -123,7 +146,6 @@ const HomeScreen = () => {
           </View>
         ))}
 
-        {/* Campaigns Section */}
         <Text style={[styles.sectionTitle, isDarkMode ? styles.darkText : styles.lightText]}>Campaigns</Text>
         <View style={styles.campaignsContainer}>
           {campaigns.map((campaign) => (
@@ -136,31 +158,40 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Campaign Modal */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
+      {/* Floating Chatbot Button */}
+      <TouchableOpacity style={styles.chatbotButton} onPress={() => setIsChatbotModalVisible(true)}>
+        <Icon name="chatbubble-ellipses-outline" size={28} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Chatbot Modal */}
+      <Modal visible={isChatbotModalVisible} transparent={true} animationType="slide" onRequestClose={() => setIsChatbotModalVisible(false)}>
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>New Campaign</Text>
-            <TextInput
-              placeholder="Campaign Title"
-              value={newCampaign.title}
-              onChangeText={(text) => setNewCampaign({ ...newCampaign, title: text })}
-              style={styles.modalInput}
+          <View style={styles.chatbotContent}>
+            <Text style={styles.modalTitle}>Chatbot Help</Text>
+            <FlatList
+              data={chatMessages}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={[styles.chatMessage, item.isUser ? styles.userMessage : styles.botMessage]}>
+                  <Text style={styles.chatText}>{item.text}</Text>
+                </View>
+              )}
             />
-            <TextInput
-              placeholder="Campaign Description"
-              value={newCampaign.description}
-              onChangeText={(text) => setNewCampaign({ ...newCampaign, description: text })}
-              style={[styles.modalInput, styles.modalTextArea]}
-              multiline
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleAddCampaign}>
-              <Text style={styles.submitButtonText}>Submit</Text>
+            <View style={styles.chatInputContainer}>
+              <TextInput
+                style={styles.chatInput}
+                placeholder="Ask me anything..."
+                placeholderTextColor="#888"
+                value={userInput}
+                onChangeText={setUserInput}
+                onSubmitEditing={handleChatSubmit}
+              />
+              <TouchableOpacity onPress={handleChatSubmit}>
+                <Icon name="send-outline" size={24} color="#039BE5" />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setIsChatbotModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -177,7 +208,6 @@ const CategoryIcon = ({ icon, label, onPress, isDarkMode }) => (
     <Text style={[styles.categoryLabel, isDarkMode ? styles.darkText : styles.lightText]}>{label}</Text>
   </View>
 );
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -394,6 +424,54 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  chatbotButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#4CAF50',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
+  chatbotContent: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    width: '90%',
+    height: '60%',
+  },
+  chatMessage: {
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    maxWidth: '80%',
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#4CAF50',
+  },
+  botMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#e0e0e0',
+  },
+  chatText: {
+    fontSize: 16,
+  },
+  chatInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    paddingVertical: 10,
+  },
+  chatInput: {
+    flex: 1,
+    padding: 10,
+    fontSize: 16,
   },
 });
 
