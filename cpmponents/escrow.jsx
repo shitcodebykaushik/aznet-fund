@@ -10,38 +10,42 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-// Set your base URL here, depending on your setup:
-const BASE_URL = 'http://10.0.2.2:8082'; // Android Emulator
-// For iOS Simulator or actual device, you can use http://localhost:8082 if it's accessible
+const BASE_URL = 'http://10.0.2.2:8082';
+
+const colors = {
+  background: '#ffffff',
+  primary: '#4285F4',
+  secondary: '#34A853',
+  danger: '#EA4335',
+  textPrimary: '#202124',
+  textSecondary: '#5F6368',
+  inputBackground: '#F1F3F4',
+  border: '#E0E0E0',
+};
 
 const EscrowPage = () => {
   const [payer, setPayer] = useState('');
   const [payee, setPayee] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  const [approveLoading, setApproveLoading] = useState({ payer: false, payee: false });
+  const [cancelLoading, setCancelLoading] = useState(false);
 
-  // Function to create an escrow
   const submitEscrow = async () => {
     if (!payer || !payee || !amount) {
       Alert.alert('Missing Information', 'Please fill out all fields.');
       return;
     }
     setLoading(true);
-
     try {
       const response = await fetch(`${BASE_URL}/create`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payer, payee, amount: parseFloat(amount) }),
       });
-
-      if (response.ok) {
-        Alert.alert('Success', 'Escrow transaction has been created.');
-      } else {
-        Alert.alert('Error', 'Failed to create escrow.');
-      }
+      response.ok
+        ? Alert.alert('Success', 'Escrow transaction has been created.')
+        : Alert.alert('Error', 'Failed to create escrow.');
     } catch (error) {
       Alert.alert('Error', 'Failed to connect to the server.');
       console.error(error);
@@ -50,192 +54,154 @@ const EscrowPage = () => {
     }
   };
 
-  // Function to approve escrow as either payer or payee
   const approveEscrow = async (role) => {
-    const endpoint = role === 'payer' ? '/approve/payer' : '/approve/payee';
-
+    setApproveLoading({ ...approveLoading, [role]: true });
     try {
-      const response = await fetch(`${BASE_URL}${endpoint}`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        Alert.alert('Approval', `${role.charAt(0).toUpperCase() + role.slice(1)} has approved the escrow.`);
-      } else {
-        Alert.alert('Error', 'Failed to approve escrow.');
-      }
+      const response = await fetch(`${BASE_URL}/approve/${role}`, { method: 'POST' });
+      response.ok
+        ? Alert.alert('Approval', `${role === 'payer' ? 'Payer' : 'Payee'} has approved the escrow.`)
+        : Alert.alert('Error', 'Failed to approve escrow.');
     } catch (error) {
       Alert.alert('Error', 'Failed to connect to the server.');
       console.error(error);
+    } finally {
+      setApproveLoading({ ...approveLoading, [role]: false });
     }
   };
 
-  // Function to cancel escrow
   const cancelEscrow = async () => {
+    setCancelLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/cancel`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        Alert.alert('Cancellation', 'The escrow transaction has been canceled.');
-      } else {
-        Alert.alert('Error', 'Failed to cancel escrow.');
-      }
+      const response = await fetch(`${BASE_URL}/cancel`, { method: 'POST' });
+      response.ok
+        ? Alert.alert('Cancellation', 'The escrow transaction has been canceled.')
+        : Alert.alert('Error', 'Failed to cancel escrow.');
     } catch (error) {
       Alert.alert('Error', 'Failed to connect to the server.');
       console.error(error);
+    } finally {
+      setCancelLoading(false);
     }
   };
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Escrow Transaction</Text>
-      <Text style={styles.subtitle}>Fill in the details to initiate an escrow transaction.</Text>
-
+      <Text style={styles.subtitle}>Enter details to create an escrow transaction</Text>
       <View style={styles.card}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Payer's Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., John Doe"
-            placeholderTextColor="#999"
-            value={payer}
-            onChangeText={setPayer}
-          />
-        </View>
+        <InputField label="Payer's Name" value={payer} onChangeText={setPayer} />
+        <InputField label="Payee's Name" value={payee} onChangeText={setPayee} />
+        <InputField label="Amount" value={amount} onChangeText={setAmount} keyboardType="numeric" />
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Payee's Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g., Jane Smith"
-            placeholderTextColor="#999"
-            value={payee}
-            onChangeText={setPayee}
-          />
-        </View>
+        <ActionButton
+          title="Create Escrow"
+          onPress={submitEscrow}
+          loading={loading}
+          style={styles.submitButton}
+        />
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Amount</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter amount"
-            placeholderTextColor="#999"
-            value={amount}
-            onChangeText={setAmount}
-            keyboardType="numeric"
-          />
-        </View>
-
-        {/* Submit Escrow */}
-        <TouchableOpacity style={styles.submitButton} onPress={submitEscrow} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.submitButtonText}>Create Escrow</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Approve and Cancel Buttons */}
-        <TouchableOpacity style={styles.approveButton} onPress={() => approveEscrow('payer')}>
-          <Text style={styles.approveButtonText}>Approve as Payer</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.approveButton} onPress={() => approveEscrow('payee')}>
-          <Text style={styles.approveButtonText}>Approve as Payee</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.cancelButton} onPress={cancelEscrow}>
-          <Text style={styles.cancelButtonText}>Cancel Escrow</Text>
-        </TouchableOpacity>
+        <ActionButton
+          title="Approve as Payer"
+          onPress={() => approveEscrow('payer')}
+          loading={approveLoading.payer}
+          style={styles.approveButton}
+        />
+        
+        <ActionButton
+          title="Approve as Payee"
+          onPress={() => approveEscrow('payee')}
+          loading={approveLoading.payee}
+          style={styles.approveButton}
+        />
+        
+        <ActionButton
+          title="Cancel Escrow"
+          onPress={cancelEscrow}
+          loading={cancelLoading}
+          style={styles.cancelButton}
+        />
       </View>
     </ScrollView>
   );
+};
+
+const InputField = ({ label, value, onChangeText, keyboardType = 'default' }) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput
+      style={styles.input}
+      placeholder={`Enter ${label.toLowerCase()}`}
+      placeholderTextColor={colors.textSecondary}
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType={keyboardType}
+    />
+  </View>
+);
+
+const ActionButton = ({ title, onPress, loading, style }) => (
+  <TouchableOpacity style={style} onPress={onPress} disabled={loading}>
+    {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.buttonText}>{title}</Text>}
+  </TouchableOpacity>
+);
+
+// Shared button styles
+const sharedButtonStyles = {
+  borderRadius: 25,
+  paddingVertical: 12,
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginTop: 12,
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.background,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    color: colors.textPrimary,
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#777',
-    marginBottom: 20,
+    color: colors.textSecondary,
+    marginBottom: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     borderRadius: 15,
     padding: 20,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 3,
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
+  inputContainer: { marginBottom: 15 },
   label: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 5,
+    fontSize: 14,
+    color: colors.textPrimary,
     fontWeight: '600',
+    marginBottom: 4,
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    paddingHorizontal: 15,
+    backgroundColor: colors.inputBackground,
+    borderRadius: 12,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  submitButton: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 15,
-    paddingVertical: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  approveButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 15,
-    paddingVertical: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  approveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    backgroundColor: '#FF5252',
-    borderRadius: 15,
-    paddingVertical: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  submitButton: { ...sharedButtonStyles, backgroundColor: colors.primary },
+  approveButton: { ...sharedButtonStyles, backgroundColor: colors.secondary },
+  cancelButton: { ...sharedButtonStyles, backgroundColor: colors.danger },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
 
 export default EscrowPage;
