@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation, setIsLoggedIn }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
 
-  // Function to handle login
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://10.0.2.2:8080/login', { // Use 10.0.2.2 for Android emulator
+      const response = await fetch('http://10.0.2.2:8080/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,7 +19,7 @@ const LoginScreen = () => {
 
       if (response.ok) {
         Alert.alert('Success', 'Login successful!');
-        navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+        setIsLoggedIn(true); // Update isLoggedIn state on successful login
       } else {
         Alert.alert('Error', data.error || 'Invalid email or password');
       }
@@ -35,7 +32,6 @@ const LoginScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back!</Text>
-
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -46,7 +42,6 @@ const LoginScreen = () => {
           onChangeText={setEmail}
         />
       </View>
-
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -57,11 +52,9 @@ const LoginScreen = () => {
           onChangeText={setPassword}
         />
       </View>
-
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
-
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don't have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>

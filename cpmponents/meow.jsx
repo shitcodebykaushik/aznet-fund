@@ -20,6 +20,7 @@ const HomeScreen = () => {
   const isDarkMode = colorScheme === 'dark';
   const navigation = useNavigation();
 
+  // State for greeting, campaigns, modal visibility, and profile modal
   const [greeting, setGreeting] = useState('');
   const [campaigns, setCampaigns] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -30,10 +31,12 @@ const HomeScreen = () => {
   const [userInput, setUserInput] = useState('');
   const [conversationStage, setConversationStage] = useState(0);
 
+  // Sample data for past donations
   const pastDonations = [
     { id: 1, item: 'Winter Jacket', date: '2023-10-15', imageUri: 'https://example.com/jacket.png' },
   ];
 
+  // Update greeting based on the time of day
   useEffect(() => {
     const currentHour = new Date().getHours();
     setGreeting(
@@ -41,18 +44,22 @@ const HomeScreen = () => {
     );
   }, []);
 
+  // Handle adding a new campaign
   const handleAddCampaign = () => {
     setCampaigns([...campaigns, { ...newCampaign, id: campaigns.length + 1 }]);
     setNewCampaign({ title: '', description: '', status: 'Approval is Pending' });
     setIsModalVisible(false);
   };
 
+  // Handle user input for chatbot
   const handleChatSubmit = () => {
     if (userInput.trim() === '') return;
 
+    // Add user message
     const userMessage = { id: Date.now().toString(), text: userInput, isUser: true };
     setChatMessages([...chatMessages, userMessage]);
 
+    // Determine chatbot response based on conversation stage
     setTimeout(() => {
       let botMessageText = '';
       if (conversationStage === 0) {
@@ -66,10 +73,10 @@ const HomeScreen = () => {
         setConversationStage(3);
       } else if (conversationStage === 3 && userInput.toLowerCase() === 'no') {
         botMessageText = "Your problem has been registered. Please contact us at 6239165083.";
-        setConversationStage(0);
+        setConversationStage(0); // Reset the conversation
       } else {
         botMessageText = "Thank you for reaching out. Have a great day!";
-        setConversationStage(0);
+        setConversationStage(0); // Reset the conversation
       }
 
       const botMessage = { id: (Date.now() + 1).toString(), text: botMessageText, isUser: false };
@@ -82,6 +89,7 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode ? styles.darkMode : styles.lightMode]}>
       <ScrollView style={[styles.container, isDarkMode ? styles.darkMode : styles.lightMode]}>
+        {/* Existing Content */}
         <View style={styles.header}>
           <Text style={[styles.greeting, isDarkMode ? styles.darkText : styles.lightText]}>{greeting} Aman 👋</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -94,7 +102,9 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        <Text style={[styles.subheading, isDarkMode ? styles.darkText : styles.lightText]}>What do you wanna donate today?</Text>
+        <Text style={[styles.subheading, isDarkMode ? styles.darkText : styles.lightText]}>
+          What do you wanna donate today?
+        </Text>
 
         <View style={[styles.searchContainer, isDarkMode ? styles.darkSearch : styles.lightSearch]}>
           <Icon name="search-outline" size={20} color={isDarkMode ? '#ccc' : '#888'} />
@@ -105,9 +115,10 @@ const HomeScreen = () => {
           />
           <Icon name="options-outline" size={20} color={isDarkMode ? '#ccc' : '#888'} />
         </View>
-
         <View style={[styles.campaignBanner, isDarkMode ? styles.darkBanner : styles.lightBanner]}>
-          <Text style={[styles.bannerText, isDarkMode ? styles.darkText : styles.lightText]}>Do you really have a creative idea?</Text>
+          <Text style={[styles.bannerText, isDarkMode ? styles.darkText : styles.lightText]}>
+            Do you really have a creative idea?
+          </Text>
           <TouchableOpacity
             style={[styles.startCampaignButton, isDarkMode ? styles.darkButton : styles.lightButton]}
             onPress={() => setIsModalVisible(true)}
@@ -120,7 +131,7 @@ const HomeScreen = () => {
         <View style={styles.categoryContainer}>
           <CategoryIcon icon="apps-outline" label="Escrow" onPress={() => navigation.navigate('EscrowPage')} isDarkMode={isDarkMode} />
           <CategoryIcon icon="megaphone-outline" label="Campaign" onPress={() => navigation.navigate('Campaign')} isDarkMode={isDarkMode} />
-          <CategoryIcon icon="gift-outline" label="Donate Goods" onPress={() => navigation.navigate("Donate Goods")} isDarkMode={isDarkMode} />
+          <CategoryIcon icon="gift-outline" label="Donate Goods" onPress={() => navigation.navigate('Donate Goods')} isDarkMode={isDarkMode} />
           <CategoryIcon icon="heart-outline" label="Charity" onPress={() => navigation.navigate('CharityPage')} isDarkMode={isDarkMode} />
         </View>
 
@@ -146,35 +157,6 @@ const HomeScreen = () => {
           ))}
         </View>
       </ScrollView>
-
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>New Campaign</Text>
-            <TextInput
-              placeholder="Campaign Title"
-              value={newCampaign.title}
-              onChangeText={(text) => setNewCampaign({ ...newCampaign, title: text })}
-              style={styles.modalInput}
-            />
-            <TextInput
-              placeholder="Campaign Description"
-              value={newCampaign.description}
-              onChangeText={(text) => setNewCampaign({ ...newCampaign, description: text })}
-              style={[styles.modalInput, styles.modalTextArea]}
-              multiline
-            />
-            <TouchableOpacity style={styles.submitButton} onPress={handleAddCampaign}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       {/* Floating Chatbot Button */}
       <TouchableOpacity style={styles.chatbotButton} onPress={() => setIsChatbotModalVisible(true)}>
@@ -442,7 +424,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  }, 
+  },
   chatbotButton: {
     position: 'absolute',
     bottom: 20,
