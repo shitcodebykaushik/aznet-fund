@@ -83,7 +83,7 @@ const HomeScreen = () => {
     <SafeAreaView style={[styles.safeArea, isDarkMode ? styles.darkMode : styles.lightMode]}>
       <ScrollView style={[styles.container, isDarkMode ? styles.darkMode : styles.lightMode]}>
         <View style={styles.header}>
-          <Text style={[styles.greeting, isDarkMode ? styles.darkText : styles.lightText]}>{greeting} Aman 👋</Text>
+          <Text style={[styles.greeting, isDarkMode ? styles.darkText : styles.lightText]}>{greeting} 0x7👋</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity onPress={() => setIsProfileModalVisible(true)} style={styles.iconContainer}>
               <Icon name="person-outline" size={24} color={isDarkMode ? '#fff' : '#333'} />
@@ -214,6 +214,26 @@ const HomeScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Profile Modal */}
+      <Modal
+        visible={isProfileModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsProfileModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.profileModalContent}>
+            <Text style={styles.profileModalTitle}>User Profile</Text>
+            <Text style={styles.profileText}>Name: John Doe</Text>
+            <Text style={styles.profileText}>Email: johndoe@example.com</Text>
+            <Text style={styles.profileText}>Status: Active</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setIsProfileModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -226,6 +246,7 @@ const CategoryIcon = ({ icon, label, onPress, isDarkMode }) => (
     <Text style={[styles.categoryLabel, isDarkMode ? styles.darkText : styles.lightText]}>{label}</Text>
   </View>
 );
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -442,7 +463,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  }, 
+  },
   chatbotButton: {
     position: 'absolute',
     bottom: 20,
@@ -490,6 +511,33 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     fontSize: 16,
+  },
+  closeButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  profileModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    width: '90%',
+    alignItems: 'center',
+  },
+  profileModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  profileText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
 
